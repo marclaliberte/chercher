@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys,csv,chercherConn,chercherDb
+import sys,csv,chercherThread,chercherDb,threading
 
 # Define funciton to read CSV
 def startScan(file_obj):
@@ -14,7 +14,7 @@ def startScan(file_obj):
 
     # Prep chercher includes
     db = chercherDb.chercherDb()
-    conn = chercherConn.chercherConn()
+    conn = chercherThread.chercherConn()
 
     # Add new test to database
     testId,addError = db.addTest()
@@ -32,16 +32,34 @@ def startScan(file_obj):
                 reader = csv.reader(file_obj)
                 for rank,host in reader:
                     # test the host for SSL3
-                    ssl3v,ssl3c,ssl3e = conn.testConnect(host,destPort,protocol0,ciphers)
+                    thread1 = chercherThread.chercherThread(host,destPort,protocol0,ciphers)
 
                     # test the host for TLSv1
-                    tls1v,tls1c,tls1e = conn.testConnect(host,destPort,protocol1,ciphers)
+                    thread2 = chercherThread.chercherThread(host,destPort,protocol1,ciphers)
 
                     # test the host for TLSv1_1
-                    tls1_1v,tls1_1c,tls1_1e = conn.testConnect(host,destPort,protocol2,ciphers)
+                    thread3 = chercherThread.chercherThread(host,destPort,protocol2,ciphers)
 
                     # Test the host for TLSv1_2
-                    tls1_2v,tls1_2c,tls1_2e = conn.testConnect(host,destPort,protocol3,ciphers)
+                    thread4 = chercherThread.chercherThread(host,destPort,protocol3,ciphers)
+
+                    # Start Threads
+                    thread1.start()
+                    thread2.start()
+                    thread3.start()
+                    thread4.start()
+
+                    # Wait for results
+                    thread1.join()
+                    thread2.join()
+                    thread3.join()
+                    thread4.join()
+
+                    # Save results from each thread
+                    ssl3v,ssl3c,ssl3e = thread1.version,thread1.suite,thread1.error
+                    tls1v,tls1c,tls1e = thread2.version,thread2.suite,thread2.error
+                    tls1_1v,tls1_1c,tls1_1e = thread3.version,thread3.suite,thread3.error
+                    tls1_2v,tls1_2c,tls1_2e = thread4.version,thread4.suite,thread4.error
 
 	            # Resolve hostname
                     addr,dnserr = conn.resolveName(host)
@@ -59,27 +77,6 @@ def startScan(file_obj):
                     # Update table with end time
                     addEndTestErr = db.addTestEnd(testId)
 
-csv_path = "top-1k.csv"
+csv_path = "top-50k.csv"
 with open(csv_path, "rb") as f_obj:
     startScan(f_obj)
-
-#destName = 'blogspot.com'
-#destPort = 443
-#protocol0 = 'SSLv3'
-#protocol1 = 'TLSv1'
-#protocol2 = 'TLSv1_1'
-#protocol3 = 'TLSv1_2'
-#ciphers = ''
-
-#test = chercherConn.chercherConn()
-
-#version0, cipher0, error0 = test.testConnect(destName,destPort,protocol0,ciphers)
-#version1, cipher1, error1 = test.testConnect(destName,destPort,protocol1,ciphers)
-#version2, cipher2, error2 = test.testConnect(destName,destPort,protocol2,ciphers)
-#version3, cipher3, error3 = test.testConnect(destName,destPort,protocol3,ciphers)
-
-#print "Host: ", destName, ":", destPort
-#print "Test 1: ", version0, cipher0, error0
-#print "Test 2: ", version1, cipher1, error1
-#print "Test 3: ", version2, cipher2, error2
-#print "Test 4: ", version3, cipher3, error3
