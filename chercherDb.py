@@ -10,7 +10,7 @@ class chercherDb:
 
     # Global class variables
     dbHost = 'localhost'
-    dbName = 'chercherdb_test'
+    dbName = 'chercherdb'
     dbUser = 'chercher'
     dbPass = 'ChercherStrongPass'
 
