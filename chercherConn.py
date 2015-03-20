@@ -4,9 +4,27 @@
 # Tests and records supported protocol versions
 ##
 
-import socket,ssl,sys
+import socket,ssl,sys,threading,time
+
+class chercherThread(threading.Thread):
+    def __init__(self,host,port,proto,cipher):
+        super(chercherThread, self).__init__()
+        self.host = host
+        self.port = port
+        self.proto = proto
+        self.cipher = cipher
+
+    def run(self):
+        test = chercherConn()
+        self.version,self.suite,self.error = test.testConnect(self.host,self.port,self.proto,self.cipher)
+
 
 class chercherConn:
+    def echoMarc(self,host,port,proto,cipher):
+        version = "1"
+        suite = ["AES-256","test1","128"]
+        error = ""
+        return version,suite,error
 
     def testConnect(self,destName,destPort,proto,ciphers):
         # Define blank variables
@@ -57,6 +75,9 @@ class chercherConn:
         except ssl.CertificateError, msg:
             error = "Certificate Error"
 
+        except ValueError, msg:
+            error = self.conErrorHandler(str(msg))
+
             if "Certificate Error" in error:
                 # Certificate error, test without cert verify
                 # Close old socket
@@ -94,6 +115,9 @@ class chercherConn:
                 except ssl.CertificateError, msg:
                     error = "Certificate Error"
 
+                except ValueError, msg:
+                    error = self.conErrorHandler(str(msg))
+
         if version:
             versionBool = '1'
         else:
@@ -123,9 +147,15 @@ class chercherConn:
             errOut = "SSL Alert: Wrong Version Number"
         elif "SSLV3_ALERT_HANDSHAKE_FAILURE" in errIn:
             # SSLv3 Alert Handshake Failure
-            errOut = "SSLv3 Alert: Handshake Failure" 
+            errOut = "SSLv3 Alert: Handshake Failure"
+        elif "TLSV1_ALERT_PROTOCOL_VERSION" in errIn:
+            errOut = "TLSv1 Alert: Protocol Version"
         elif "CERTIFICATE_VERIFY_FAILED" in errIn:
             # Certificate Verification Failed
+            errOut = "Certificate Error"
+        elif "EOF occurred in violation of protocol" in errIn:
+            errOut = "Connection Closed Early"
+        elif "empty or no certificate" in errIn:
             errOut = "Certificate Error"
         else:
             errOut = errIn
@@ -143,3 +173,4 @@ class chercherConn:
             error = self.conErrorHandler(str(msg))
 
         return (address,error)
+

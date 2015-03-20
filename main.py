@@ -1,6 +1,6 @@
-#!/usr/bin/python
+!/usr/bin/python
 
-import sys,csv,chercherThread,chercherDb,threading
+import sys,csv,chercherConn,chercherDb,threading
 
 # Define funciton to read CSV
 def startScan(file_obj):
@@ -14,7 +14,7 @@ def startScan(file_obj):
 
     # Prep chercher includes
     db = chercherDb.chercherDb()
-    conn = chercherThread.chercherConn()
+    conn = chercherConn.chercherConn()
 
     # Add new test to database
     testId,addError = db.addTest()
@@ -32,16 +32,16 @@ def startScan(file_obj):
                 reader = csv.reader(file_obj)
                 for rank,host in reader:
                     # test the host for SSL3
-                    thread1 = chercherThread.chercherThread(host,destPort,protocol0,ciphers)
+                    thread1 = chercherConn.chercherThread(host,destPort,protocol0,ciphers)
 
                     # test the host for TLSv1
-                    thread2 = chercherThread.chercherThread(host,destPort,protocol1,ciphers)
+                    thread2 = chercherConn.chercherThread(host,destPort,protocol1,ciphers)
 
                     # test the host for TLSv1_1
-                    thread3 = chercherThread.chercherThread(host,destPort,protocol2,ciphers)
+                    thread3 = chercherConn.chercherThread(host,destPort,protocol2,ciphers)
 
                     # Test the host for TLSv1_2
-                    thread4 = chercherThread.chercherThread(host,destPort,protocol3,ciphers)
+                    thread4 = chercherConn.chercherThread(host,destPort,protocol3,ciphers)
 
                     # Start Threads
                     thread1.start()
@@ -78,5 +78,5 @@ def startScan(file_obj):
                     addEndTestErr = db.addTestEnd(testId)
 
 csv_path = "top-50k.csv"
-with open(csv_path, "rb") as f_obj:
+with open(csv_path, "rb") asConn:
     startScan(f_obj)
