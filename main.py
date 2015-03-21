@@ -1,6 +1,6 @@
-!/usr/bin/python
+#!/usr/bin/python
 
-import sys,csv,chercherConn,chercherDb,threading
+import sys,csv,threading,ConfigParser,chercherConn,chercherDb
 
 # Define funciton to read CSV
 def startScan(file_obj):
@@ -68,6 +68,7 @@ def startScan(file_obj):
 
                     addToTaberror = db.addSiteResult(testId,host,addr,destPort,ssl3v,str(ssl3c[0]),ssl3e,tls1v,str(tls1c[0]),tls1e,tls1_1v,str(tls1_1c[0]),tls1_1e,tls1_2v,str(tls1_2c[0]),tls1_2e)
 
+                    # Print results so we know it is working
                     print "***ADDED TO TABLE***"
                     print "%s %s SSLv3: %s %s %s" % (rank,host,ssl3v,ssl3c[0],ssl3e)
                     print "%s %s TLSv1: %s %s %s" % (rank,host,tls1v,tls1c[0],tls1e)
@@ -75,8 +76,16 @@ def startScan(file_obj):
                     print "%s %s TLSv1.2: %s %s %s" % (rank,host,tls1_2v,tls1_2c[0],tls1_2e)
 
                     # Update table with end time
+                    # Did not mean for this to be called for every site but it
+                    # makes sure there is always an end time even if the test
+                    # ends prematurely
                     addEndTestErr = db.addTestEnd(testId)
 
-csv_path = "top-50k.csv"
-with open(csv_path, "rb") asConn:
-    startScan(f_obj)
+if __name__ == "__main__":
+    # File called directly, run script
+    # Grab CSV file from config
+    config = ConfigParser.RawConfigParser()
+    config.read("chercher.conf")
+    csv_path = config.get('chercher', 'list_location')
+    with open(csv_path, "rb") as f_obj:
+        startScan(f_obj)

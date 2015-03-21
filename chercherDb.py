@@ -4,15 +4,18 @@
 # Handles interaction with mysql
 ##
 
-import sys,datetime,MySQLdb
+import sys,datetime,ConfigParser,MySQLdb
 
 class chercherDb:
 
-    # Global class variables
-    dbHost = 'localhost'
-    dbName = 'chercherdb'
-    dbUser = 'chercher'
-    dbPass = 'ChercherStrongPass'
+    # Retrieve MySQL settings from config
+    config = ConfigParser.RawConfigParser()
+    config.read("chercher.conf")
+
+    dbHost = config.get('mysqldb','host')
+    dbName = config.get('mysqldb','database')
+    dbUser = config.get('mysqldb','user')
+    dbPass = config.get('mysqldb','password')
 
     def addTest(self):
         # Connects to mysql, adds a new entryto the testTab table, returns test ID
