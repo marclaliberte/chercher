@@ -1,6 +1,18 @@
 #!/usr/bin/python
 
-import sys,csv,threading,ConfigParser,chercherConn,chercherDb
+import sys,csv,threading,ConfigParser,chercherConn,chercherDb,Queue,threading
+
+q_in = Queue.Queue(maxsize=0)
+num_worker_threads = 12
+
+
+def worker():
+    destPort = 443
+    conn = chercherConn.chercherConn()
+    while True:
+        do = q_in.get()
+        conn.testHost(do[0],do[1],do[2],destPort)
+        q_in.task_done()
 
 # Define funciton to read CSV
 def startScan(file_obj):
@@ -28,58 +40,27 @@ def startScan(file_obj):
             # No error creating result table
             # Begin test
 
-                # Read csv file and test each host
-                reader = csv.reader(file_obj)
-                for rank,host in reader:
-                    # test the host for SSL3
-                    thread1 = chercherConn.chercherThread(host,destPort,protocol0,ciphers)
+            # Read csv file and test each host
+            reader = csv.reader(file_obj)
 
-                    # test the host for TLSv1
-                    thread2 = chercherConn.chercherThread(host,destPort,protocol1,ciphers)
+            for i in range(num_worker_threads):
+                t = threading.Thread(target=worker)
+                t.daemon = True
+                t.start()
 
-                    # test the host for TLSv1_1
-                    thread3 = chercherConn.chercherThread(host,destPort,protocol2,ciphers)
+            for rank,host in reader:
+                # For each line containing siteRank and Host
+                # Add to threading queue for testin
+                do = []
+                do.append(testId)
+                do.append(rank)
+                do.append(host)
+                q_in.put(do)
 
-                    # Test the host for TLSv1_2
-                    thread4 = chercherConn.chercherThread(host,destPort,protocol3,ciphers)
+            q_in.join()
+            print "Complete"
+#                conn.testHost(testId,rank,host,destPort)
 
-                    # Start Threads
-                    thread1.start()
-                    thread2.start()
-                    thread3.start()
-                    thread4.start()
-
-                    # Wait for results
-                    thread1.join()
-                    thread2.join()
-                    thread3.join()
-                    thread4.join()
-
-                    # Save results from each thread
-                    ssl3v,ssl3c,ssl3e = thread1.version,thread1.suite,thread1.error
-                    tls1v,tls1c,tls1e = thread2.version,thread2.suite,thread2.error
-                    tls1_1v,tls1_1c,tls1_1e = thread3.version,thread3.suite,thread3.error
-                    tls1_2v,tls1_2c,tls1_2e = thread4.version,thread4.suite,thread4.error
-
-	            # Resolve hostname
-                    addr,dnserr = conn.resolveName(host)
-
-                    # Add results to table
-
-                    addToTaberror = db.addSiteResult(testId,host,addr,destPort,ssl3v,str(ssl3c[0]),ssl3e,tls1v,str(tls1c[0]),tls1e,tls1_1v,str(tls1_1c[0]),tls1_1e,tls1_2v,str(tls1_2c[0]),tls1_2e)
-
-                    # Print results so we know it is working
-                    print "***ADDED TO TABLE***"
-                    print "%s %s SSLv3: %s %s %s" % (rank,host,ssl3v,ssl3c[0],ssl3e)
-                    print "%s %s TLSv1: %s %s %s" % (rank,host,tls1v,tls1c[0],tls1e)
-                    print "%s %s TLSv1.1: %s %s %s" % (rank,host,tls1_1v,tls1_1c[0],tls1_1e)
-                    print "%s %s TLSv1.2: %s %s %s" % (rank,host,tls1_2v,tls1_2c[0],tls1_2e)
-
-                    # Update table with end time
-                    # Did not mean for this to be called for every site but it
-                    # makes sure there is always an end time even if the test
-                    # ends prematurely
-                    addEndTestErr = db.addTestEnd(testId)
 
 if __name__ == "__main__":
     # File called directly, run script
