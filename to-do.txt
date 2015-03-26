@@ -1,9 +1,6 @@
 To Do
 -----
-
-- Add external (to script) configuration file
-
+- Add to crontab
 - Add checking for:
 - - EXP ciphers
 - - SSLv2
-
