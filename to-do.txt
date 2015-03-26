@@ -1,0 +1,6 @@
+To Do
+-----
+- Add to crontab
+- Add checking for:
+- - EXP ciphers
+- - SSLv2

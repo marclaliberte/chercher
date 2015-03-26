@@ -4,15 +4,18 @@
 # Handles interaction with mysql
 ##
 
-import sys,datetime,MySQLdb
+import sys,datetime,ConfigParser,MySQLdb
 
 class chercherDb:
 
-    # Global class variables
-    dbHost = 'localhost'
-    dbName = 'chercherdb'
-    dbUser = 'chercher'
-    dbPass = 'ChercherStrongPass'
+    # Retrieve MySQL settings from config
+    config = ConfigParser.RawConfigParser()
+    config.read("chercher.conf")
+
+    dbHost = config.get('mysqldb','host')
+    dbName = config.get('mysqldb','database')
+    dbUser = config.get('mysqldb','user')
+    dbPass = config.get('mysqldb','password')
 
     def addTest(self):
         # Connects to mysql, adds a new entryto the testTab table, returns test ID
@@ -89,7 +92,7 @@ class chercherDb:
         cur = db.cursor()
 
         # Prepare statement
-        sql = "CREATE TABLE %s (siteNum INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, scanTime DATETIME NOT NULL, host VARCHAR(128) NOT NULL, addr VARCHAR(40), port SMALLINT UNSIGNED NOT NULL DEFAULT '443', ssl3 BOOLEAN NOT NULL, ssl3C VARCHAR(64), ssl3E VARCHAR(64), tls1 BOOLEAN NOT NULL, tls1C VARCHAR(64), tls1E VARCHAR(64), tls1_1 BOOLEAN NOT NULL, tls1_1C VARCHAR(64), tls1_1E VARCHAR(64), tls1_2 BOOLEAN NOT NULL, tls1_2C VARCHAR(64), tls1_2E VARCHAR(64))" % tabName
+        sql = "CREATE TABLE %s (siteNum INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, scanTime DATETIME NOT NULL, siteRank INT UNSIGNED NOT NULL, host VARCHAR(128) NOT NULL, addr VARCHAR(40), port SMALLINT UNSIGNED NOT NULL DEFAULT '443', ssl3 BOOLEAN NOT NULL, ssl3C VARCHAR(64), ssl3E VARCHAR(64), tls1 BOOLEAN NOT NULL, tls1C VARCHAR(64), tls1E VARCHAR(64), tls1_1 BOOLEAN NOT NULL, tls1_1C VARCHAR(64), tls1_1E VARCHAR(64), tls1_2 BOOLEAN NOT NULL, tls1_2C VARCHAR(64), tls1_2E VARCHAR(64))" % tabName
 
         # Attempt to execute command
         try:
@@ -103,7 +106,7 @@ class chercherDb:
 
         return (error)
 
-    def addSiteResult(self,testNum,host,addr,port,ssl3,ssl3C,ssl3E,tls1,tls1C,tls1E,tls1_1,tls1_1C,tls1_1E,tls1_2,tls1_2C,tls1_2E):
+    def addSiteResult(self,testNum,rank,host,addr,port,ssl3,ssl3C,ssl3E,tls1,tls1C,tls1E,tls1_1,tls1_1C,tls1_1E,tls1_2,tls1_2C,tls1_2E):
         # Adds site data to table for testNum
         # Define variables
         error = ''
@@ -119,7 +122,7 @@ class chercherDb:
         dt = datetime.datetime.utcnow()
 
         # Prepare statement
-        sql = "INSERT INTO %s (scanTime, host, addr, port, ssl3, ssl3C, ssl3E, tls1, tls1C, tls1E, tls1_1, tls1_1C, tls1_1E, tls1_2, tls1_2C, tls1_2E) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (tabName,dt,host,addr,port,ssl3,ssl3C,ssl3E,tls1,tls1C,tls1E,tls1_1,tls1_1C,tls1_1E,tls1_2,tls1_2C,tls1_2E)
+        sql = "INSERT INTO %s (scanTime, siteRank, host, addr, port, ssl3, ssl3C, ssl3E, tls1, tls1C, tls1E, tls1_1, tls1_1C, tls1_1E, tls1_2, tls1_2C, tls1_2E) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (tabName,dt,rank,host,addr,port,ssl3,ssl3C,ssl3E,tls1,tls1C,tls1E,tls1_1,tls1_1C,tls1_1E,tls1_2,tls1_2C,tls1_2E)
 
         # Attempt to execute command
         try:
