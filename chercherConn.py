@@ -200,9 +200,9 @@ class chercherConn:
             errOut = "TLSv1 Alert: Protocol Version"
         elif "CERTIFICATE_VERIFY_FAILED" in errIn:
             # Certificate Verification Failed
-           errOut = "Certificate Error"
+            errOut = "Certificate Error"
         elif "TLSV1_UNRECOGNIZED_NAME" in errIn:
-           errOut = "TLSv1 Alert: Unrecognized Name"
+            errOut = "TLSv1 Alert: Unrecognized Name"
         elif "EOF occurred in violation of protocol" in errIn:
             errOut = "Connection Closed Early"
         elif "empty or no certificate" in errIn:
