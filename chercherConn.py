@@ -43,6 +43,8 @@ class chercherConn:
         thread4 = chercherThread(host,destPort,protocol3,ciphers)
 
         # Start threads
+        # Ran into issue with false positive for SSLv3 only support
+        # Reverse the start order
         thread1.start()
         thread2.start()
         thread3.start()
@@ -104,7 +106,7 @@ class chercherConn:
 
         # Bind context to socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(1)
+        s.settimeout(3)
         ssl_sock = context.wrap_socket(s, server_hostname=destName)
 
         # Connect to dest
@@ -145,7 +147,7 @@ class chercherConn:
             context1.verify_mode = ssl.CERT_NONE
             context1.set_ciphers(ciphers)
             s1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s1.settimeout(1)
+            s1.settimeout(3)
             ssl_sock1 = context1.wrap_socket(s1, server_hostname=destName)
 
             # Connect to dest
