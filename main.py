@@ -3,7 +3,7 @@
 import sys,csv,threading,ConfigParser,chercherConn,chercherDb,Queue,threading
 
 q_in = Queue.Queue(maxsize=0)
-num_worker_threads = 12
+num_worker_threads = 24
 
 
 def worker():
