@@ -15,6 +15,7 @@ Python 2.7.9+, MySQL 5+, OpenSSL 1.0.1+
 - socket - Used by test client to connect to sites
 - ssl - USed by test client to negotiate SSL/TLS
 - threading - Used to allow multiple concurrent tests via threading
+- Queue - Used to manage multiple threads
 - MySQLdb - Used to interface with MySQL database
 
 ### Installation
