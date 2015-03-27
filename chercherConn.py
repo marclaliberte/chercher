@@ -129,7 +129,7 @@ class chercherConn:
         except ValueError, msg:
             error = self.conErrorHandler(str(msg))
 
-        if "Certificate Error" in error:
+        if ("Certificate Error" in error) OR ("Connection Reset By Server"):
             # Certificate error, test without cert verify
             # Close old socket
             ssl_sock.close()
