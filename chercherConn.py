@@ -101,13 +101,13 @@ class chercherConn:
 
         context.verify_mode = ssl.CERT_REQUIRED
         context.set_ciphers(ciphers)
-        context.check_hostname = True
+        context.check_hostname = False
         context.load_default_certs()
 
         # Bind context to socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(3)
-        ssl_sock = context.wrap_socket(s, server_hostname=destName)
+        ssl_sock = context.wrap_socket(s)
 
         # Connect to dest
         try:
@@ -148,7 +148,7 @@ class chercherConn:
             context1.set_ciphers(ciphers)
             s1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s1.settimeout(3)
-            ssl_sock1 = context1.wrap_socket(s1, server_hostname=destName)
+            ssl_sock1 = context1.wrap_socket(s1)
 
             # Connect to dest
             try:
